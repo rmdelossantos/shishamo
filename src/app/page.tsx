@@ -189,7 +189,7 @@ export default function HomePage() {
       </section>
 
       {/* Data Types Section */}
-      <section className="py-24 bg-muted/30">
+      <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -260,7 +260,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12 bg-muted/30">
+      <footer className="border-t py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
