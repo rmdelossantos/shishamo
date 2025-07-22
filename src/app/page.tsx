@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <section className="relative -mt-16 min-h-[90vh] flex items-center justify-center overflow-hidden gradient-bg">
+      <section className="relative -mt-16 min-h-[100vh] flex items-center justify-center overflow-hidden gradient-bg">
         <div className="absolute inset-0 opacity-5" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -125,7 +125,7 @@ export default function HomePage() {
 
         <button
           onClick={scrollToFeatures}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 hover:text-black transition-colors group"
+          className="absolute pb-8 bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 hover:text-black transition-colors group"
         >
           <span className="text-sm hover:text-black">
             See what makes us different
