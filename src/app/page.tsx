@@ -22,29 +22,50 @@ import {
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  const [isNavbarDark, setIsNavbarDark] = useState(true);
+
+  const handleScroll = () => {
+    const heroSection = document.querySelector(".gradient-bg");
+    if (heroSection) {
+      const rect = heroSection.getBoundingClientRect();
+      setIsNavbarDark(rect.bottom > 0);
+    }
+  };
 
   useEffect(() => {
     setIsLoaded(true);
-
-    const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToFeatures = () => {
-    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
+    const featuresSection = document.getElementById("features");
+    const navHeight = document.querySelector("nav")?.offsetHeight || 0;
+    if (featuresSection) {
+      const top =
+        featuresSection.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: top - navHeight, behavior: "smooth" });
+      setTimeout(() => {
+        handleScroll();
+      }, 500);
+    }
   };
 
   return (
     <div className="min-h-screen">
-      {/* Top Banner */}
-      <div className="bg-muted/50 border-b px-4 py-2 text-center text-sm text-muted-foreground">
+      <div className="bg-muted/10 border-b px-4 py-2 text-center text-sm text-muted-foreground">
         Powered by World Bank Open Data API. Real-time economic insights.
       </div>
 
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
+      <nav
+        className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${
+          isNavbarDark
+            ? "bg-transparent text-black"
+            : "bg-background text-white"
+        }`}
+      >
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Globe className="h-6 w-6" />
@@ -52,22 +73,23 @@ export default function HomePage() {
           </div>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/countries">
-              <Button size="sm">Get started</Button>
+              <Button
+                size="sm"
+                className={`text-base px-4 transition-colors ${
+                  isNavbarDark
+                    ? "bg-white/20 backdrop-blur-md border border-white/30 text-black hover:bg-white/30"
+                    : "bg-white text-black hover:bg-gray-100"
+                }`}
+              >
+                Get started
+              </Button>
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Background Pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23000000' fillOpacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            transform: `translateY(${scrollY * 0.5}px)`,
-          }}
-        />
+      <section className="relative -mt-16 min-h-[90vh] flex items-center justify-center overflow-hidden gradient-bg">
+        <div className="absolute inset-0 opacity-5" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
           <div
@@ -75,43 +97,44 @@ export default function HomePage() {
               isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            <p className="text-sm text-muted-foreground mb-4 tracking-wide uppercase">
+            <p className="text-sm text-gray-600 mb-4 tracking-wide uppercase">
               Now in early access
             </p>
 
-            <h1 className="text-primary text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight">
+            <h1 className="text-black text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight">
               The economic data
               <br />
-              <span className="text-muted-foreground">
-                {`you've been waiting for.`}
-              </span>
+              <span className="text-black">{`you've been waiting for.`}</span>
             </h1>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Link href="/countries">
-                <Button size="lg" className="text-base px-8">
+                <Button
+                  size="lg"
+                  className="text-base px-8 bg-white/20 backdrop-blur-md border border-white/30 text-black hover:bg-white/30 transition-colors"
+                >
                   Explore Countries
                 </Button>
               </Link>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-600">
                 Fast, comprehensive, reliable.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
         <button
           onClick={scrollToFeatures}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 hover:text-black transition-colors group"
         >
-          <span className="text-sm">See what makes us different</span>
+          <span className="text-sm hover:text-black">
+            See what makes us different
+          </span>
           <ChevronDown className="h-4 w-4 animate-bounce group-hover:animate-none" />
         </button>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-24 bg-background">
+      <section id="features" className="py-40 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -164,7 +187,6 @@ export default function HomePage() {
             </Card>
           </div>
 
-          {/* Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-16 border-t border-b">
             <div className="text-center">
               <div className="text-3xl font-bold mb-2">200+</div>
@@ -188,7 +210,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Data Types Section */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -240,7 +261,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -259,7 +279,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
