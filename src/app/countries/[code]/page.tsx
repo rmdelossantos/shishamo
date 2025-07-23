@@ -206,7 +206,6 @@ export default function CountryDetailPage() {
         </div>
       </div>
 
-      {/* Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-3">
@@ -268,7 +267,6 @@ export default function CountryDetailPage() {
         </Card>
       </div>
 
-      {/* Latest Value Card */}
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
