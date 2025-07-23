@@ -48,7 +48,6 @@ export default function CountriesPage() {
 
   useEffect(() => {
     fetchCountries();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
@@ -183,7 +182,6 @@ export default function CountriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
                 <TableHead>Country</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Region</TableHead>
@@ -193,9 +191,8 @@ export default function CountriesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCountries.map((country, index) => (
+              {filteredCountries.map((country) => (
                 <TableRow key={country.id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="font-medium">{country.name}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">{country.iso2Code}</Badge>
