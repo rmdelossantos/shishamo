@@ -48,6 +48,7 @@ An educational web application built for Year 7–8 students (ages 11–13) to e
 
 - UI test implemented for the APIs, using Jest
 - Test utilities scaffolded for future expansion
+- Tests run automatically via GitHub Actions workflows when pull requests are opened or merged into the main branch.
 
 ## Developer Notes
 
