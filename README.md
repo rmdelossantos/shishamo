@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌍 World Bank Data Explorer (MVP)
 
-## Getting Started
+An educational web application built for Year 7–8 students (ages 11–13) to explore global development data from the World Bank. This is the first milestone of a multi-phase project aimed at helping students engage with real-world datasets in an intuitive and accessible way.
 
-First, run the development server:
+## Live Demo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Production: [https://shishamo.russdelossantos.com](https://shishamo.russdelossantos.com)
+- Staging (my future changes past the deadline, for studying purposes): [https://shishamo-staging.russdelossantos.com](https://shishamo-staging.russdelossantos.com)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS + ShadCN
+- **Language**: TypeScript
+- **Tests**: Jest + React Testing Library
+- **Hosting**: Vercel (custom domain)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Setup Instructions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Install Node.js v22**  
+   Use [nvm](https://github.com/nvm-sh/nvm) to install:
+   ```bash
+   nvm install 22
+   nvm use 22
+   ```
+2. Clone the repo and install dependencies
+    ```bash
+    git clone https://github.com/russdelossantos/shishamo.git
+    cd shishamo
+    yarn install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Run the development server
+    ```bash
+    yarn dev
+    ```
 
-## Deploy on Vercel
+4. Run tests
+    ```bash
+    yarn test
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Testing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- UI test implemented for the APIs, using Jest
+- Test utilities scaffolded for future expansion
+
+## Developer Notes
+
+- I tackled the task by structuring my work in **modular pieces**. You can see in the Git history the different branches and PRs I made for each iteration of the app. Admittedly, my commit history could be more granular, but the branches reflect clear scopes.
+
+- I started by building a **homepage** just to get going with the codebase. I know this is typically handled by a different stack like Framer or Wix, but I thought it would be fun and useful for experimenting. It also gave me the chance to try out **ShadCN**, which helped speed up UI development.
+
+- For the **backend**, I created the API endpoints early to explore the World Bank data and get familiar with it. This was also my first time working with **Next.js API routes**, so I used this as a learning opportunity while laying the foundation for the frontend.
+
+- On the **frontend**, I built the pages separately:
+  - `/countries`: for listing and searching countries
+  - `/countries/[code]`: for displaying country indicators  
+  Both pages reuse components like cards and tables.
+
+- For **testing**, I chose to write a **UI test** for the APIs instead of frontend component tests. I felt this was more valuable within the limited timeframe, as it better reflects how the app behaves as a whole.
+
+- I then went back and worked on **refactoring** parts of the app to improve **structure and reusability**, moving stuff around tidying up shared components.
+
+- Finally, I deployed the app to a live domain for easier evaluation:  
+  [https://shishamo.russdelossantos.com](https://shishamo.russdelossantos.com)
+
+- I plan to continue development using a **staging branch**, deployed at:  
+  [https://shishamo-staging.russdelossantos.com](https://shishamo-staging.russdelossantos.com)  
+  This will be used for further changes after the deadline and for personal learning if I reach the deep-dive round.
+
