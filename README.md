@@ -29,7 +29,7 @@ An educational web application built for Year 7–8 students (ages 11–13) to e
    ```
 2. Clone the repo and install dependencies
     ```bash
-    git clone https://github.com/russdelossantos/shishamo.git
+    git clone https://github.com/rmdelossantos/shishamo.git
     cd shishamo
     yarn install
     ```
