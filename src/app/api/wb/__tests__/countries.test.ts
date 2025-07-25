@@ -1,5 +1,5 @@
-import { GET } from "../countries/route";
-import { WorldBankCountry, WorldBankData } from "@/types/worldBank";
+import { GET } from "@/app/api/wb/countries/route";
+import { WorldBankCountry, WorldBankData } from "@/types/countries";
 
 global.fetch = jest.fn();
 

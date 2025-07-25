@@ -19,6 +19,7 @@ import {
   DollarSign,
   Activity,
 } from "lucide-react";
+import Navbar from "@/components/commons/navbar";
 
 export default function HomePage() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -59,34 +60,7 @@ export default function HomePage() {
         Powered by World Bank Open Data API. Real-time economic insights.
       </div>
 
-      <nav
-        className={`sticky top-0 z-50 border-b backdrop-blur-md transition-colors duration-300 ${
-          isNavbarDark
-            ? "bg-transparent text-black"
-            : "bg-background text-white"
-        }`}
-      >
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Globe className="h-6 w-6" />
-            <span className="font-semibold text-lg">World Bank Explorer</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/countries">
-              <Button
-                size="sm"
-                className={`text-base px-4 transition-colors ${
-                  isNavbarDark
-                    ? "bg-white/20 backdrop-blur-md border border-white/30 text-black hover:bg-white/30"
-                    : "bg-white text-black hover:bg-gray-100"
-                }`}
-              >
-                Get started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar isNavbarDark={isNavbarDark} isHome />
 
       <section className="relative -mt-16 min-h-[100vh] flex items-center justify-center overflow-hidden gradient-bg">
         <div className="absolute inset-0 opacity-5" />
