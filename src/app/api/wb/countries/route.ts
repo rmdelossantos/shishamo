@@ -3,7 +3,7 @@ import {
   WorldBankCountry,
   WorldBankData,
   CountriesResponse,
-} from "@/types/worldBank";
+} from "@/types/countries";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

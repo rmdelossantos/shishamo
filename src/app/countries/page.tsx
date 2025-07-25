@@ -1,24 +1,10 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Search,
   ChevronLeft,
   ChevronRight,
   Globe,
@@ -29,12 +15,100 @@ import {
   Building2,
   DollarSign,
 } from "lucide-react";
+import { WorldBankCountry } from "@/types/countries";
+import { TableView } from "@/components/commons/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CountriesResponse, WorldBankCountry } from "@/types/worldBank";
+import { Column } from "@/types/table";
+import { getCountries } from "@/services/countries";
+import InputFilter from "@/components/commons/inputFilter";
+import Loading from "@/app/countries/loading";
 
 type ViewMode = "cards" | "table";
 
-export default function CountriesPage() {
+const countryColumns: Column<WorldBankCountry>[] = [
+  {
+    key: "name",
+    header: "Country",
+    className: "font-medium",
+  },
+  {
+    key: "iso2Code",
+    header: "Code",
+    render: (item) => <Badge variant="secondary">{item.iso2Code}</Badge>,
+  },
+  {
+    key: "region",
+    header: "Region",
+    render: (item) => item.region.value,
+  },
+  {
+    key: "incomeLevel",
+    header: "Income Level",
+    render: (item) => item.incomeLevel.value,
+  },
+  {
+    key: "capitalCity",
+    header: "Capital",
+    render: (item) => item.capitalCity || "N/A",
+  },
+  {
+    key: "id",
+    header: "Actions",
+    className: "w-[100px]",
+    render: (item) => (
+      <Link href={`/countries/${item.iso2Code.toLowerCase()}`}>
+        <Button variant="ghost" size="sm">
+          <Eye className="h-4 w-4" />
+        </Button>
+      </Link>
+    ),
+  },
+];
+
+const CountryCardsView = ({ data }: { data: WorldBankCountry[] }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    {data.map((country) => (
+      <Link
+        key={country.id}
+        href={`/countries/${country.iso2Code.toLowerCase()}`}
+      >
+        <Card className="h-full hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="grid grid-cols-[1fr_auto] gap-2 text-lg items-start">
+              <span className="line-clamp-2 break-words">{country.name}</span>
+              <Badge variant="secondary" className="justify-self-end">
+                {country.iso2Code}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2 text-sm break-words">
+              <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Region:</span>
+              <span className="truncate">{country.region.value}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm break-words">
+              <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Income:</span>
+              <span className="truncate">{country.incomeLevel.value}</span>
+            </div>
+            {country.capitalCity && (
+              <div className="flex items-center gap-2 text-sm break-words">
+                <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">Capital:</span>
+                <span className="truncate">{country.capitalCity}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </Link>
+    ))}
+  </div>
+);
+
+const CountriesPage = () => {
   const [countries, setCountries] = useState<WorldBankCountry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,20 +143,17 @@ export default function CountriesPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(
-        `/api/wb/countries?page=${currentPage}&per_page=50`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch countries");
-      }
-
-      const data: CountriesResponse = await response.json();
+      const data = await getCountries({ page: currentPage });
 
       setCountries(data.data);
       setTotalPages(Math.floor(data.total / 50));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(
+        (err as Error).name === "AbortError"
+          ? "Request timed out. Please try again."
+          : "An unexpected error occurred"
+      );
+      setCountries([]);
     } finally {
       setLoading(false);
     }
@@ -96,125 +167,7 @@ export default function CountriesPage() {
     setCurrentPage(page);
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Skeleton className="h-10 w-64 mb-4" />
-          <div className="flex gap-4 mb-4">
-            <Skeleton className="h-10 w-full max-w-md" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  const renderCardsView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      {filteredCountries.map((country) => (
-        <Link
-          key={country.id}
-          href={`/countries/${country.iso2Code.toLowerCase()}`}
-        >
-          <Card className="h-full hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
-            <CardHeader className="pb-3">
-              <CardTitle className="grid grid-cols-[1fr_auto] gap-2 text-lg items-start">
-                <span className="line-clamp-2 break-words">{country.name}</span>
-                <Badge variant="secondary" className="justify-self-end">
-                  {country.iso2Code}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm break-words">
-                <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Region:</span>
-                <span className="truncate">{country.region.value}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm break-words">
-                <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Income:</span>
-                <span className="truncate">{country.incomeLevel.value}</span>
-              </div>
-              {country.capitalCity && (
-                <div className="flex items-center gap-2 text-sm break-words">
-                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground">Capital:</span>
-                  <span className="truncate">{country.capitalCity}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
-    </div>
-  );
-
-  const renderTableView = () => (
-    <div className="mb-8">
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Country</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Region</TableHead>
-                <TableHead>Income Level</TableHead>
-                <TableHead>Capital</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCountries.map((country) => (
-                <TableRow key={country.id}>
-                  <TableCell className="font-medium">{country.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{country.iso2Code}</Badge>
-                  </TableCell>
-                  <TableCell>{country.region.value}</TableCell>
-                  <TableCell>{country.incomeLevel.value}</TableCell>
-                  <TableCell>{country.capitalCity || "N/A"}</TableCell>
-                  <TableCell>
-                    <Link href={`/countries/${country.iso2Code.toLowerCase()}`}>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  if (loading) return <Loading />;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -226,17 +179,14 @@ export default function CountriesPage() {
           </p>
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search countries..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="pl-10"
-            />
-          </div>
+          <InputFilter value={searchTerm} onChange={handleSearch} />
 
           <div className="flex gap-2">
             <Button
@@ -259,19 +209,23 @@ export default function CountriesPage() {
         </div>
       </div>
 
-      {viewMode === "cards" ? renderCardsView() : renderTableView()}
-
-      {filteredCountries.length === 0 && searchTerm && (
+      {filteredCountries.length === 0 ? (
         <div className="text-center py-12">
           <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No countries found</h3>
           <p className="text-muted-foreground">
-            Try adjusting your search terms
+            {searchTerm
+              ? "Try adjusting your search terms"
+              : "No data available"}
           </p>
         </div>
+      ) : viewMode === "cards" ? (
+        <CountryCardsView data={filteredCountries} />
+      ) : (
+        <TableView data={filteredCountries} columns={countryColumns} />
       )}
 
-      {!searchTerm && (
+      {!searchTerm && filteredCountries.length > 0 && (
         <div className="flex justify-center items-center gap-2">
           <Button
             variant="outline"
@@ -298,4 +252,6 @@ export default function CountriesPage() {
       )}
     </div>
   );
-}
+};
+
+export default CountriesPage;

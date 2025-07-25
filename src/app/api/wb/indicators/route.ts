@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  IndicatorEntry,
-  WorldBankData,
-  IndicatorResponse,
-} from "@/types/worldBank";
+import { IndicatorEntry, IndicatorResponse } from "@/types/indicators";
+import { WorldBankData } from "@/types/countries";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -27,6 +24,7 @@ export async function GET(request: Request) {
     });
 
     const json = await res.json();
+
     const [metadataRaw, entriesRaw] = json as [WorldBankData, IndicatorEntry[]];
 
     if (!metadataRaw || !Array.isArray(entriesRaw)) {

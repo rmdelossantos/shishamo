@@ -4,17 +4,9 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   ArrowLeft,
   TrendingUp,
@@ -31,7 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IndicatorEntry, IndicatorResponse } from "@/types/worldBank";
+import { IndicatorEntry } from "@/types/indicators";
+import { getIndicators } from "@/services/indicators";
+import SelectFilterCard from "@/components/commons/selectFilterCard";
+import Loading from "@/app/countries/[code]/loading";
 
 const INDICATORS = {
   population: {
@@ -40,6 +35,12 @@ const INDICATORS = {
     icon: Users,
     format: (value: number | null) =>
       value ? new Intl.NumberFormat("en-US").format(value) : "N/A",
+    selectLabel: (
+      <div className="flex items-center gap-2">
+        <Users className="h-4 w-4" />
+        Population
+      </div>
+    ),
   },
   gdp: {
     code: "NY.GDP.PCAP.CD",
@@ -54,14 +55,20 @@ const INDICATORS = {
             maximumFractionDigits: 0,
           }).format(value)
         : "N/A",
+    selectLabel: (
+      <div className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4" />
+        GDP per Capita
+      </div>
+    ),
   },
 };
 
 const YEAR_RANGES = [
-  { value: "5", label: "Last 5 years" },
-  { value: "10", label: "Last 10 years" },
-  { value: "15", label: "Last 15 years" },
-  { value: "20", label: "Last 20 years" },
+  { value: "5", label: <>Last 5 years</> },
+  { value: "10", label: <>Last 10 years</> },
+  { value: "15", label: <>Last 15 years</> },
+  { value: "20", label: <>Last 20 years</> },
 ];
 
 export default function CountryDetailPage() {
@@ -92,17 +99,11 @@ export default function CountryDetailPage() {
       setError(null);
 
       const indicator = INDICATORS[selectedIndicator];
-      const response = await fetch(
-        `/api/wb/indicators?code=${countryCode.toUpperCase()}&indicator=${
-          indicator.code
-        }&years=${selectedYears}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch country data");
-      }
-
-      const result: IndicatorResponse = await response.json();
+      const result = await getIndicators({
+        countryCode,
+        indicatorCode: indicator.code,
+        selectedYears,
+      });
 
       if (result.data && result.data.length > 0) {
         setCountryName(result.data[0].country.value);
@@ -110,10 +111,19 @@ export default function CountryDetailPage() {
           result.data.filter((item) => item.value !== null).reverse()
         );
       } else {
-        throw new Error("No data available for this country");
+        setIndicatorData([]);
+        setError("No data available for this country.");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      if ((err as Error).name === "AbortError") {
+        setError("Request timed out. Please try again.");
+      } else {
+        setError(
+          err instanceof Error ? err.message : "An unexpected error occurred"
+        );
+      }
+      setIndicatorData([]);
+      setCountryName("");
     } finally {
       setLoading(false);
     }
@@ -129,70 +139,13 @@ export default function CountryDetailPage() {
   const IconComponent = currentIndicator.icon;
   const latestData = indicatorData[indicatorData.length - 1];
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Skeleton className="h-10 w-32 mb-4" />
-          <Skeleton className="h-8 w-64" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-8 w-24" />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Link href="/countries">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Countries
-          </Button>
-        </Link>
-
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Link href="/countries">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="mb-4"
-          >
+          <Button variant="ghost" className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Countries
           </Button>
@@ -207,64 +160,24 @@ export default function CountryDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Indicator
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select
-              value={selectedIndicator}
-              onValueChange={(value) => updateUrlParams("indicator", value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="population">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Population
-                  </div>
-                </SelectItem>
-                <SelectItem value="gdp">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    GDP per Capita
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        <SelectFilterCard
+          title="Indicator"
+          icon={<BarChart3 className="h-4 w-4" />}
+          value={selectedIndicator}
+          onChange={(value) => updateUrlParams("indicator", value)}
+          options={Object.entries(INDICATORS).map(([key, { selectLabel }]) => ({
+            value: key,
+            label: selectLabel,
+          }))}
+        />
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Time Range
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select
-              value={selectedYears}
-              onValueChange={(value) => updateUrlParams("years", value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {YEAR_RANGES.map((range) => (
-                  <SelectItem key={range.value} value={range.value}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        <SelectFilterCard
+          title="Time Range"
+          icon={<Calendar className="h-4 w-4" />}
+          value={selectedYears}
+          onChange={(value) => updateUrlParams("years", value)}
+          options={YEAR_RANGES}
+        />
       </div>
 
       <Card className="mb-6">
@@ -275,13 +188,17 @@ export default function CountryDetailPage() {
           <IconComponent className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
-            {latestData ? currentIndicator.format(latestData.value) : "N/A"}
-          </div>
-          {latestData && (
-            <p className="text-xs text-muted-foreground mt-1">
-              as of {latestData.date}
-            </p>
+          {latestData ? (
+            <>
+              <div className="text-2xl font-bold">
+                {currentIndicator.format(latestData.value)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                as of {latestData.date}
+              </p>
+            </>
+          ) : (
+            <div className="text-muted-foreground text-sm">No data to show</div>
           )}
         </CardContent>
       </Card>
@@ -326,6 +243,12 @@ export default function CountryDetailPage() {
                 country.
               </p>
             </div>
+          )}
+
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
         </CardContent>
       </Card>

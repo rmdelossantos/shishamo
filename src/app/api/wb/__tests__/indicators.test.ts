@@ -1,5 +1,6 @@
-import { GET } from "../indicators/route";
-import { IndicatorEntry, WorldBankData } from "@/types/worldBank";
+import { GET } from "@/app/api/wb/indicators/route";
+import { IndicatorEntry } from "@/types/indicators";
+import { WorldBankData } from "@/types/countries";
 
 global.fetch = jest.fn();
 
